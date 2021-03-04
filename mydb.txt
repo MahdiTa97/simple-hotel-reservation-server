@@ -1,0 +1,118 @@
+CREATE TABLE store.shakhs
+(
+    ssn bigint NOT NULL,
+    "Lvl" character varying(150),
+    "Fname" character varying(250) NOT NULL,
+    "Lname" character varying(250) NOT NULL,
+    PRIMARY KEY (ssn),
+    UNIQUE (ssn)
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE store.shakhs
+    OWNER to mahdi;
+
+//=====================
+CREATE TABLE store.phone
+(
+    ssn bigint NOT NULL,
+    phone bigint NOT NULL,
+    PRIMARY KEY (ssn, phone),
+    FOREIGN KEY (ssn)
+        REFERENCES store.shakhs (ssn) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE store.phone
+    OWNER to mahdi;
+//=====================
+CREATE TABLE store.address
+(
+    "postalCode" bigint,
+    city character varying(50),
+    state character varying(50),
+    address character varying(250),
+    ssn bigint,
+    PRIMARY KEY ("postalCode", state, ssn),
+    FOREIGN KEY (ssn)
+        REFERENCES store.shakhs (ssn) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE store.address
+    OWNER to mahdi;
+//=====================
+CREATE TABLE store."order"
+(
+    id uuid NOT NULL,
+    shakhs_ssn bigint NOT NULL,
+    status character varying(150) NOT NULL,
+    cost bigint,
+    count integer,
+    PRIMARY KEY (id),
+    FOREIGN KEY (shakhs_ssn)
+        REFERENCES store.shakhs (ssn) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE store."order"
+    OWNER to mahdi;
+//=====================
+CREATE TABLE store.storage
+(
+    id uuid NOT NULL,
+    city character varying,
+    state character varying,
+    "postalCode" bigint,
+    PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE store.storage
+    OWNER to mahdi;
+//=====================
+CREATE TABLE store.product
+(
+    id uuid NOT NULL,
+    name character varying(250),
+    cost integer,
+    count integer,
+    "orderId" uuid,
+    "storageId" uuid,
+    PRIMARY KEY (id),
+    FOREIGN KEY ("orderId")
+        REFERENCES store."order" (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    FOREIGN KEY ("storageId")
+        REFERENCES store.storage (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE store.product
+    OWNER to mahdi;
