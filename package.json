@@ -15,8 +15,8 @@
     "pg": "^8.5.1"
   },
   "scripts": {
-    "client": "cd client && yarn start",
-    "server": "cd server && nodemon index.js",
+    "client": "cd client && yarn && yarn start",
+    "server": "cd server && yarn && nodemon index.js",
     "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
     "start": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
   }
