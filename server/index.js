@@ -11,7 +11,8 @@ app.use(cors());
 const { Client } = require("pg");
 const { createTableText, dropTable } = require("./DB/index");
 
-const connectionString = "postgres://mahdi:1234@localhost:5432/db981";
+const connectionString =
+  "postgres://xepmtxkk:fxCG378qO0qSmIP4KhGbMeM3w3crc1Iz@ziggy.db.elephantsql.com:5432/xepmtxkk";
 const client = new Client({
   connectionString: connectionString,
 });

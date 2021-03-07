@@ -1,0 +1,227 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- https://www.javaguicodexample.com/mysqldatabasequerynetbeansex.html
+-- -------------HOTEL-------------
+CREATE TABLE IF NOT EXISTS hotel
+(
+    hotelNo character varying(10) NOT NULL,
+    hotelName character varying(20) NOT NULL,
+    city character varying(20),
+    hotelAddress character varying(50),
+    PRIMARY KEY (hotelNo)
+)
+WITH (
+    OIDS = FALSE
+);
+
+-- INSERT
+INSERT INTO hotel(hotelNo, hotelName, city, hotelAddress)
+VALUES('fb01','Grosvenor', 'London', '1914  Bird Spring Lane'),
+('fb02','Watergate', 'Paris', '1775  Sheila Lane'),
+('ch01','Omni Shoreham', 'London', '4728  Sunny Glen Lane'),
+('ch02','Phoenix Park', 'London', '4713  Thompson Drive'),
+('dc01','Latham', 'Berlin', '4286  Bird Street');
+
+-- -------------ROOM-------------
+CREATE TABLE IF NOT EXISTS room
+(
+    roomNo numeric(3) NOT NULL,
+    hotelNo character varying(20) NOT NULL,
+    type character varying(10) NOT NULL,
+    price decimal(5,2),
+    status character varying(10) NOT NULL DEFAULT 'free',
+    PRIMARY KEY (roomNo, hotelNo),
+    FOREIGN KEY (hotelNo)
+        REFERENCES hotel (hotelNo) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
+
+-- INSERT
+INSERT INTO room(roomNo, hotelNo, type, price, status)
+VALUES(501, 'fb01', 'single', 19, 'free'),
+(601, 'fb01', 'double', 29, 'free'),
+(701, 'fb01', 'family', 39, 'free'),
+(101, 'fb02', 'single', 58, 'free'),
+(111, 'fb02', 'double', 86, 'free'),
+(101, 'ch01', 'single', 29.99, 'free'),
+(112, 'ch01', 'family', 59.99, 'free'),
+(701, 'ch02', 'single', 10, 'free'),
+(801, 'ch02', 'double', 15, 'free'),
+(901, 'dc01', 'single', 18, 'free'),
+(101, 'dc01', 'double', 30, 'free'),
+(111, 'dc01', 'family', 35, 'free');
+
+-- -------------GUEST-------------
+CREATE TABLE IF NOT EXISTS guest
+(
+    guestSsn character(10),
+    guestFname character varying(20) NOT NULL,
+    guestLname character varying(20) NOT NULL,
+    guestAddress character varying(50),
+    guestBirthdate date,
+    PRIMARY KEY (guestSsn)
+)
+WITH (
+    OIDS = FALSE
+);
+
+-- INSERT
+INSERT into guest(guestSsn, guestFname, guestLname, guestAddress, guestBirthdate)
+VALUES('0525551433', 'John' ,'Kay', '56 High St, London', '2001-10-05'),
+('0046525637', 'Mike' ,'Ritchie', '18 Tain St, London', '2001-10-05'),
+('0189973935', 'Mary' ,'Tregear', '5 Tarbot Rd, Aberdeen', '2001-10-05'),
+('0998525227', 'Joe' ,'Keogh', '2 Fergus Dr, Aberdeen', '2001-10-05'),
+('0799624934', 'Carol' ,'Farrel', '6 Achray St, Glasgow', '2001-10-05'),
+('0020452934', 'Tina' ,'Murphy', '63 Well St, Glasgow', '2001-10-05'),
+('0020452935', 'Tony' ,'Shaw', '12 Park Pl, Glasgow', '2001-10-05');
+
+-- -------------BOOKING-------------
+CREATE TABLE IF NOT EXISTS booking
+(
+    hotelNo character varying(20) NOT NULL,
+    guestSsn character varying(10) NOT NULL,
+    dateIn date NOT NULL,
+    dateOut date NOT NULL,
+    roomNo numeric(3),
+    paymentNo uuid,
+    bookingStatus integer NOT NULL DEFAULT 0,
+    PRIMARY KEY (hotelNo,guestSsn,dateIn),
+    FOREIGN KEY (roomNo, hotelNo)
+        REFERENCES room (roomNo, hotelNo) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID,
+    FOREIGN KEY (guestSsn)
+        REFERENCES guest (guestSsn) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID,
+    FOREIGN KEY (paymentNo)
+        REFERENCES payment (paymentNo) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
+
+-- INSERT
+INSERT into booking(hotelNo, guestSsn, dateIn, dateOut, roomNo, paymentNo, bookingStatus)
+VALUES("fb01", "0525551433" ,"2001-10-05", "2001-10-07", "501", null, "0"),
+("fb01", "0046525637" ,"2001-10-05", "2001-10-08", "601", null, "0"),
+("fb02", "0189973935" ,"2001-10-05", "2001-10-09", "111", null, "0"),
+("fb02", "0998525227" ,"2001-10-05", "2001-10-10", "101", null, "0"),
+("ch02", "0799624934" ,"2001-10-05", "2001-10-11", "701", null, "0"),
+("dc01", "0020452934" ,"2001-10-05", "2001-10-12", "901", null, "0"),
+("dc01", "0020452935" ,"2001-10-05", "2001-10-13", "111", null, "0");
+
+-- -------------PAYMENT-------------
+CREATE TABLE IF NOT EXISTS payment
+(
+    "paymentNo" uuid NOT NULL DEFAULT uuid_generate_v4(),
+    "paymentPrice" character varying(250),
+    "type" character varying(250),
+    "date" timestamp NOT NULL DEFAULT NOW(),
+    PRIMARY KEY ("paymentNo")
+)
+WITH (
+    OIDS = FALSE
+);
+
+-- -------------PERSONNEL-------------
+CREATE TABLE IF NOT EXISTS personnel
+(
+    "pCode" bigint NOT NULL,
+    "fName" character varying(250) NOT NULL,
+    "lName" character varying(250) NOT NULL,
+    "pass" character varying(250) NOT NULL,
+    "salary" bigint NOT NULL,
+    "hotelNo" character varying(20) NOT NULL,
+    "side" character varying(250),
+    "shiftWork" character varying(250),
+    "type" character varying(250) NOT NULL,
+    PRIMARY KEY ("pCode"),
+    FOREIGN KEY ("hotelNo")
+        REFERENCES hotel ("hotelNo") MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
+
+-- -------------CLEANING-------------
+CREATE TABLE IF NOT EXISTS cleaning
+(
+    "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+    "pCode" bigint NOT NULL,
+    "roomId" uuid NOT NULL,
+    PRIMARY KEY ("pCode", "roomId", "id"),
+    FOREIGN KEY ("pCode")
+        REFERENCES personnel ("pCode") MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID,
+    FOREIGN KEY ("roomId")
+        REFERENCES room ("id") MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
+
+-- -------------HOTEL TEL-------------
+CREATE TABLE IF NOT EXISTS hotelTel
+(
+    "hTel" character varying(250) NOT NULL,
+    "hotelNo" character varying(20) NOT NULL,
+    PRIMARY KEY ("hTel", "hotelNo"),
+    FOREIGN KEY ("hotelNo")
+        REFERENCES hotel ("hotelNo") MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
+
+-- -------------PERSONEL TEL-------------
+CREATE TABLE IF NOT EXISTS personnelTel
+(
+    "pCode" bigint NOT NULL,
+    "pTel" character varying(250) NOT NULL,
+    PRIMARY KEY ("pCode", "pTel"),
+    FOREIGN KEY ("pCode")
+        REFERENCES personnel ("pCode") MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
+
+-- -------------GUEST TEL-------------
+CREATE TABLE IF NOT EXISTS guestTel
+(
+    "gSsn" bigint NOT NULL,
+    "gTel" character varying(250) NOT NULL,
+    PRIMARY KEY ("gSsn", "gTel"),
+    FOREIGN KEY ("gSsn")
+        REFERENCES guest ("ssn") MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
