@@ -1,12 +1,20 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-
-const cors = require("cors");
+const path = require("path");
 
 var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
+const buildPath = path.join(__dirname, "..", "build");
+app.use(express.static(buildPath));
+
+const PORT = process.env.PORT || 5000;
+
+app.set("port", PORT);
+
+app.listen(PORT, function () {
+  console.log(`server started on port ${PORT}`);
+});
 
 const { Client } = require("pg");
 const { createTableText, dropTable } = require("./DB/index");
@@ -283,11 +291,6 @@ app.post("/createroom", createRoom);
 
 app.get("/reset", reset);
 
-app.set("port", process.env.PORT || 4000);
-
-app.listen(4000, function () {
-  console.log("Server is running.. on Port 4000");
-});
 // =======================
 // Creates
 
