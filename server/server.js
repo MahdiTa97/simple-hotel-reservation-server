@@ -33,7 +33,7 @@ const reset = async function (req, res, next) {
   res.status(200).send();
 };
 // ==============================
-// ========>>CRUD HOTEL<<========
+// ========>>✔ CRUD HOTEL<<========
 // ==============================
 const createHotel = (req, res, next) => {
   const { hotelNo, hotelName, city, hotelAddress } = req.body;
@@ -64,15 +64,11 @@ const searchHotelsByName = async function (req, res, next) {
 };
 // --------------------
 const updateHotel = (req, res, next) => {
-  const { hotelNo, hotelName, city, hotelAddress } = req.body;
+  const { hotelNo, ...resProps } = req.body;
   client
     .query(
       `UPDATE hotel
-        ${magicGen("SET", {
-          hotelName: hotelName,
-          city: city,
-          hotelAddress: hotelAddress,
-        })}
+        ${magicGen("SET", resProps)}
         WHERE
         hotelNo = '${hotelNo}'`
     )
@@ -81,7 +77,6 @@ const updateHotel = (req, res, next) => {
 };
 // --------------------
 const deleteHotel = (req, res, next) => {
-  console.log(`${magicGen("DELETE FROM hotel WHERE", req.body.hotelNo)}`);
   client
     .query(
       `${magicGen("DELETE FROM hotel WHERE", { hotelNo: req.body.hotelNo })}`
@@ -96,7 +91,7 @@ app.get("/searchhotelsbyname", searchHotelsByName);
 app.post("/updatehotel", updateHotel);
 app.post("/deletehotel", deleteHotel);
 // ==============================
-// ========>>CRUD ROOM<<========
+// ========>>✔ CRUD ROOM<<========
 // ==============================
 const createRoom = (req, res, next) => {
   const {
@@ -121,10 +116,32 @@ const getRooms = async function (req, res, next) {
   res.status(200).send(rows);
 };
 // --------------------
-app.get("/getrooms", getRooms);
+const updateRoom = (req, res, next) => {
+  const { roomNo, ...resProps } = req.body;
+  client
+    .query(
+      `UPDATE room
+        ${magicGen("SET", resProps)}
+        WHERE
+        roomNo = '${roomNo}'`
+    )
+    .then((res) => res.status(200).send(res))
+    .catch((err) => res.status(500).send(err));
+};
+// --------------------
+const deleteRoom = (req, res, next) => {
+  client
+    .query(`${magicGen("DELETE FROM room WHERE", { roomNo: req.body.roomNo })}`)
+    .then((res) => res.status(200).send(res))
+    .catch((err) => res.status(500).send(err));
+};
+// --------------------
 app.post("/createroom", createRoom);
+app.get("/getrooms", getRooms);
+app.post("/updateroom", updateRoom);
+app.post("/deleteroom", deleteRoom);
 // ==============================
-// ========>>CRUD GUEST<<========
+// ========>>✔ CRUD GUEST<<========
 // ==============================
 const createGuest = (req, res, next) => {
   const {
@@ -136,19 +153,45 @@ const createGuest = (req, res, next) => {
   } = req.body;
   client
     .query(
-      `INSERT INTO guest(guestSsn, guestFname, guestLname, guestAddress, guestBirthdate)	VALUES ('${guestSsn}', '${guestFname}, '${guestLname}, '${guestAddress}, '${guestBirthdate}')`
+      `INSERT INTO guest(guestSsn, guestFname, guestLname, guestAddress, guestBirthdate)	VALUES ('${guestSsn}', '${guestFname}', '${guestLname}, '${guestAddress}', '${guestBirthdate}')`
     )
     .then((res) => next())
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
 const getGuests = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM guest`);
+  const { rows } = await client.query(
+    `SELECT * FROM guest ${magicGen("WHERE", req.query)}`
+  );
   res.status(200).send(rows);
+};
+// --------------------
+const updateGuest = (req, res, next) => {
+  const { guestSsn, ...resProps } = req.body;
+  client
+    .query(
+      `UPDATE guest
+        ${magicGen("SET", resProps)}
+        WHERE
+        guestSsn = '${guestSsn}'`
+    )
+    .then((res) => res.status(200).send(res))
+    .catch((err) => res.status(500).send(err));
+};
+// --------------------
+const deleteGuest = (req, res, next) => {
+  client
+    .query(
+      `${magicGen("DELETE FROM guest WHERE", { guestSsn: req.body.guestSsn })}`
+    )
+    .then((res) => res.status(200).send(res))
+    .catch((err) => res.status(500).send(err));
 };
 // --------------------
 app.get("/getguests", getGuests);
 app.post("/createguest", createGuest);
+app.post("/updateguest", updateGuest);
+app.post("/deleteguest", deleteGuest);
 // ==============================
 // ========>>CRUD PAYMENT<<========
 // ==============================
