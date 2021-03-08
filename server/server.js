@@ -38,7 +38,7 @@ const createHotel = (req, res, next) => {
 
   client
     .query(
-      `INSERT INTO hotel.hotel(name, sum, city, street, ave)	VALUES ($1, $2, $3, $4, $5)`,
+      `INSERT INTO hotel(name, sum, city, street, ave)	VALUES ($1, $2, $3, $4, $5)`,
       [name, sum, city, street, ave]
     )
     .then((res) => res.status(200).send(res))
@@ -60,7 +60,7 @@ const createPersonnel = (req, res, next) => {
 
   client
     .query(
-      `INSERT INTO hotel.personnel("pCode", "fName", "lName", pass, salary, "hotelName", side, "shiftWork", type)	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      `INSERT INTO personnel("pCode", "fName", "lName", pass, salary, "hotelName", side, "shiftWork", type)	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [pCode, fName, lName, pass, salary, hotelName, side, shiftWork, type]
     )
     .then((res) => next())
@@ -72,7 +72,7 @@ const createRoom = (req, res, next) => {
 
   client
     .query(
-      `INSERT INTO hotel.room(id, type, cost, "bedNumber", floor, "hotelName")	VALUES ($1, $2, $3, $4, $5, $6)`,
+      `INSERT INTO room(id, type, cost, "bedNumber", floor, "hotelName")	VALUES ($1, $2, $3, $4, $5, $6)`,
       ["uuid_generate_v4()", type, cost, bedNumber, floor, hotelName]
     )
     .then((res) => next())
@@ -84,7 +84,7 @@ const createGuest = (req, res, next) => {
 
   client
     .query(
-      `INSERT INTO hotel.guest(ssn, email, "bDate", "Fname", "Lname")	VALUES ($1, $2, $3, $4, $5)`,
+      `INSERT INTO guest(ssn, email, "bDate", "Fname", "Lname")	VALUES ($1, $2, $3, $4, $5)`,
       [ssn, email, bDate, Fname, Lname]
     )
     .then((res) => next())
@@ -95,10 +95,12 @@ const createPayment = (req, res, next) => {
   const { id, cost, type, date } = req.body;
 
   client
-    .query(
-      `INSERT INTO hotel.payment(id, cost, type, date)	VALUES ($1, $2, $3, $4)`,
-      ["uuid_generate_v4()", cost, type, date]
-    )
+    .query(`INSERT INTO payment(id, cost, type, date)	VALUES ($1, $2, $3, $4)`, [
+      "uuid_generate_v4()",
+      cost,
+      type,
+      date,
+    ])
     .then((res) => next())
     .catch((err) => res.status(500).send(err));
 };
@@ -118,7 +120,7 @@ const createReserve = (req, res, next) => {
 
   client
     .query(
-      `INSERT INTO hotel.room(id, "roomId", "gSsn", "payId", duration, "reserveDate", "gCount", "hName", status)	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      `INSERT INTO room(id, "roomId", "gSsn", "payId", duration, "reserveDate", "gCount", "hName", status)	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         "uuid_generate_v4()",
         id,
@@ -137,14 +139,14 @@ const createReserve = (req, res, next) => {
 };
 
 const getHotels = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM hotel.hotel`);
+  const { rows } = await client.query(`SELECT * FROM hotel`);
   res.status(200).send(rows);
 };
 
 const getServants = async function (req, res, next) {
   const {
     rows,
-  } = await client.query(`SELECT "pCode", "fName", "lName" FROM hotel.personnel
+  } = await client.query(`SELECT "pCode", "fName", "lName" FROM personnel
   WHERE type = 'servant'`);
   res.status(200).send(rows);
 };
@@ -153,7 +155,7 @@ const getHotelPersonnel = async function (req, res, next) {
   const { type = "servant", hotelName } = req.query;
   const {
     rows,
-  } = await client.query(`SELECT "pCode", "fName", "lName" FROM hotel.personnel
+  } = await client.query(`SELECT "pCode", "fName", "lName" FROM personnel
   WHERE type = '${type}'
   AND "hotelName" = (VALUES('${hotelName}'))`);
   res.status(200).send(rows);
@@ -161,48 +163,48 @@ const getHotelPersonnel = async function (req, res, next) {
 
 const getHotelRoom = async function (req, res, next) {
   const { hotelName } = req.query;
-  const { rows } = await client.query(`SELECT * FROM hotel.room
+  const { rows } = await client.query(`SELECT * FROM room
   WHERE "hotelName" = (VALUES('${hotelName}'))`);
   res.status(200).send(rows);
 };
 
 const getRoom = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM hotel.room`);
+  const { rows } = await client.query(`SELECT * FROM room`);
   res.status(200).send(rows);
 };
 
 const getCleaning = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM hotel.cleaning`);
+  const { rows } = await client.query(`SELECT * FROM cleaning`);
   res.status(200).send(rows);
 };
 
 const getGuest = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM hotel.guest`);
+  const { rows } = await client.query(`SELECT * FROM guest`);
   res.status(200).send(rows);
 };
 
 const getGuestTel = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM hotel.guesttel`);
+  const { rows } = await client.query(`SELECT * FROM guesttel`);
   res.status(200).send(rows);
 };
 
 const getHotelTel = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM hotel.hoteltel`);
+  const { rows } = await client.query(`SELECT * FROM hoteltel`);
   res.status(200).send(rows);
 };
 
 const getPayment = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM hotel.hoteltel`);
+  const { rows } = await client.query(`SELECT * FROM hoteltel`);
   res.status(200).send(rows);
 };
 
 const getPersonnelTel = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM hotel.personneltel`);
+  const { rows } = await client.query(`SELECT * FROM personneltel`);
   res.status(200).send(rows);
 };
 
 const getReserve = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM hotel.reserve`);
+  const { rows } = await client.query(`SELECT * FROM reserve`);
   res.status(200).send(rows);
 };
 
@@ -211,7 +213,7 @@ const createCleaning = (req, res, next) => {
   console.log(pCode, roomId);
   client
     .query(
-      `INSERT INTO hotel.cleaning(id, "pCode", "roomId")	VALUES (uuid_generate_v4(), '${pCode}', '${roomId}')`
+      `INSERT INTO cleaning(id, "pCode", "roomId")	VALUES (uuid_generate_v4(), '${pCode}', '${roomId}')`
     )
     .then((res) => res.status(200).send(res))
     .catch((err) => res.status(500).send(err));
@@ -221,7 +223,7 @@ const createHotelTel = (req, res, next) => {
   const { hTel, hName } = req.body;
   client
     .query(
-      `INSERT INTO hotel.hoteltel("hTel", "hName")	VALUES ('${hTel}', '${hName}')`
+      `INSERT INTO hoteltel("hTel", "hName")	VALUES ('${hTel}', '${hName}')`
     )
     .then((res) => res.status(200).send(res))
     .catch((err) => res.status(500).send(err));
@@ -231,7 +233,7 @@ const createPersonnelTel = (req, res, next) => {
   const { pCode, pTel } = req.body;
   client
     .query(
-      `INSERT INTO hotel.personneltel("pCode", "pTel")	VALUES ('${pCode}', '${pTel}')`
+      `INSERT INTO personneltel("pCode", "pTel")	VALUES ('${pCode}', '${pTel}')`
     )
     .then((res) => res.status(200).send(res))
     .catch((err) => res.status(500).send(err));
@@ -240,9 +242,7 @@ const createPersonnelTel = (req, res, next) => {
 const createGuestTel = (req, res, next) => {
   const { gSsn, gTel } = req.body;
   client
-    .query(
-      `INSERT INTO hotel.guesttel("gSsn", "gTel")	VALUES ('${gSsn}', '${gTel}')`
-    )
+    .query(`INSERT INTO guesttel("gSsn", "gTel")	VALUES ('${gSsn}', '${gTel}')`)
     .then((res) => res.status(200).send(res))
     .catch((err) => res.status(500).send(err));
 };
