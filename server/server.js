@@ -1,30 +1,26 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
-
-var app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-const buildPath = path.join(__dirname, "..", "build");
-app.use(express.static(buildPath));
-
-const PORT = process.env.PORT || 5000;
-
-app.set("port", PORT);
-
-app.listen(PORT, function () {
-  console.log(`server started on port ${PORT}`);
-});
-
 const { Client } = require("pg");
 const { createTableText, dropTable } = require("./DB/index");
+const { magicGen } = require("./utils/magicGen");
 
+var app = express();
+const PORT = process.env.PORT || 5000;
+const buildPath = path.join(__dirname, "..", "build");
 const connectionString =
   "postgres://xepmtxkk:fxCG378qO0qSmIP4KhGbMeM3w3crc1Iz@ziggy.db.elephantsql.com:5432/xepmtxkk";
 const client = new Client({
   connectionString: connectionString,
 });
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static(buildPath));
+app.set("port", PORT);
+app.listen(PORT, function () {
+  console.log(`server started on port ${PORT}`);
+});
 client.connect();
 
 const reset = async function (req, res, next) {
@@ -37,9 +33,6 @@ const reset = async function (req, res, next) {
 // ==============================
 const createHotel = (req, res, next) => {
   const { hotelNo, hotelName, city, hotelAddress } = req.body;
-  console.log(
-    `INSERT INTO hotel(hotelNo, hotelName, city, hotelAddress) VALUES ('${hotelNo}', '${hotelName}', '${city}, '${hotelAddress}')`
-  );
   client
     .query(
       `INSERT INTO hotel(hotelNo, hotelName, city, hotelAddress) VALUES ('${hotelNo}', '${hotelName}', '${city}', '${hotelAddress}')`
@@ -251,7 +244,6 @@ const createBooking = (req, res, next) => {
     paymentNo = null,
     bookingStatus = "0",
   } = req.body;
-
   client
     .query(
       `INSERT INTO booking(hotelNo, guestSsn, dateIn, dateOut, roomNo, paymentNo, bookingStatus)	VALUES ('${hotelNo}', '${guestSsn}, '${dateIn}, '${dateOut}, '${roomNo}, '${paymentNo}, '${bookingStatus})`
@@ -259,7 +251,50 @@ const createBooking = (req, res, next) => {
     .then((res) => next())
     .catch((err) => res.status(500).send(err));
 };
-
+// --------------------
+const getBookings = async function (req, res, next) {
+  const { rows } = await client.query(
+    `SELECT * FROM booking  ${magicGen("WHERE", req.query)}`
+  );
+  res.status(200).send(rows);
+};
+// --------------------
+const updateBooking = (req, res, next) => {
+  const { hotelNo, guestSsn, dateIn, ...resProps } = req.body;
+  client
+    .query(
+      `UPDATE booking
+        ${magicGen("SET", { dateIn: dateIn, ...resProps })}
+        ${magicGen("WHERE", {
+          hotelNo: hotelNo,
+          guestSsn: guestSsn,
+          dateIn: dateIn,
+        })}`
+    )
+    .then((res) => res.status(200).send(res))
+    .catch((err) => res.status(500).send(err));
+};
+// --------------------
+const deleteBooking = (req, res, next) => {
+  client
+    .query(
+      `${magicGen("DELETE FROM booking WHERE", {
+        hotelNo: req.body.hotelNo,
+        guestSsn: req.body.guestSsn,
+        dateIn: req.body.dateIn,
+      })}`
+    )
+    .then((res) => res.status(200).send(res))
+    .catch((err) => res.status(500).send(err));
+};
+// --------------------
+app.post("/createbooking", createBooking);
+app.get("/getbookings", getBookings);
+app.post("/updatebooking", updateBooking);
+app.post("/deletebooking", deleteBooking);
+// ==============================
+// ========>>CRUD PERSONNEL<<========
+// ==============================
 const createPersonnel = (req, res, next) => {
   const {
     pCode,
@@ -280,13 +315,6 @@ const createPersonnel = (req, res, next) => {
     )
     .then((res) => next())
     .catch((err) => res.status(500).send(err));
-};
-
-// ========>>GET ALLS<<========
-
-const getBookings = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM booking`);
-  res.status(200).send(rows);
 };
 
 const getServants = async function (req, res, next) {
@@ -366,25 +394,6 @@ const createGuestTel = (req, res, next) => {
     .catch((err) => res.status(500).send(err));
 };
 
-// === === === HOTEL === === ===
-
-// === === === ROOM === === ===
-
-// === === === GUEST === === ===
-
-// === === === PAYMENT === === ===
-
-// === === === RESERVE === === ===
-app.get("/getbookings", getBookings);
-app.post("/createreserve", createBooking);
-
-// ---- ---- ---- ---- ----
-// ---- ---- ---- ---- ----
-// ---- ---- ---- ---- ----
-// ---- ---- ---- ---- ----
-// ---- ---- ---- ---- ----
-// ---- ---- ---- ---- ----
-
 // === === === CLEANING === === ===
 app.get("/getcleanings", getCleanings);
 app.post("/createcleaning", createCleaning);
@@ -407,25 +416,3 @@ app.get("/getpersonneltel", getPersonnelTels);
 app.post("/createpersonneltel", createPersonnelTel);
 
 app.get("/reset", reset);
-
-function existUpdate(key, value, isLast = false) {
-  return value ? `${key} = '${value}'${isLast ? "" : ","}` : "";
-}
-
-function magicGen(cond, params) {
-  let query = Object.keys(params)
-    .filter((k) => params[k] !== undefined)
-    .map((k) => {
-      if (params[k]) return k + "=" + `'${params[k]}'`;
-      else return;
-    })
-    .join(",");
-  if (query) return `${cond} ${query}`;
-  else return "";
-}
-
-// =======================
-// Creates
-
-// CREATE SCHEMA "as"
-//     AUTHORIZATION mahdi;
