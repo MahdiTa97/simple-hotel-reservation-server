@@ -124,12 +124,12 @@ CREATE TABLE IF NOT EXISTS booking
         REFERENCES guest (guestSsn) MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE
+        NOT VALID,
+    FOREIGN KEY (paymentNo)
+        REFERENCES payment (paymentNo) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
         NOT VALID
-    -- FOREIGN KEY (paymentNo)
-    --     REFERENCES payment (paymentNo) MATCH SIMPLE
-    --     ON UPDATE CASCADE
-    --     ON DELETE CASCADE
-    --     NOT VALID
 )
 WITH (
     OIDS = FALSE

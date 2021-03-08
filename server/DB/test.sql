@@ -123,12 +123,12 @@ CREATE TABLE IF NOT EXISTS booking
         REFERENCES guest (guestSsn) MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE
+        NOT VALID,
+    FOREIGN KEY (paymentNo)
+        REFERENCES payment (paymentNo) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
         NOT VALID
-    -- FOREIGN KEY (paymentNo)
-    --     REFERENCES payment (paymentNo) MATCH SIMPLE
-    --     ON UPDATE CASCADE
-    --     ON DELETE CASCADE
-    --     NOT VALID
 )
 WITH (
     OIDS = FALSE
@@ -147,18 +147,18 @@ VALUES('fb01', '0525551433' ,'2001-10-05', '2001-10-07', 501, null, '0'),
 -- -------------PERSONNEL-------------
 CREATE TABLE IF NOT EXISTS personnel
 (
-    "pCode" bigint NOT NULL,
-    "fName" character varying(250) NOT NULL,
-    "lName" character varying(250) NOT NULL,
-    "pass" character varying(250) NOT NULL,
-    "salary" bigint NOT NULL,
-    "hotelNo" character varying(20) NOT NULL,
-    "side" character varying(250),
-    "shiftWork" character varying(250),
-    "type" character varying(250) NOT NULL,
-    PRIMARY KEY ("pCode"),
-    FOREIGN KEY ("hotelNo")
-        REFERENCES hotel ("hotelNo") MATCH SIMPLE
+    pCode bigint NOT NULL,
+    fName character varying(250) NOT NULL,
+    lName character varying(250) NOT NULL,
+    pass character varying(250) NOT NULL,
+    salary bigint NOT NULL,
+    hotelNo character varying(20) NOT NULL,
+    side character varying(250),
+    shiftWork character varying(250),
+    personnelType character varying(250) NOT NULL,
+    PRIMARY KEY (pCode),
+    FOREIGN KEY (hotelNo)
+        REFERENCES hotel (hotelNo) MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE
         NOT VALID
