@@ -32,16 +32,160 @@ const reset = async function (req, res, next) {
   await client.query(createTableText);
   res.status(200).send();
 };
-
+// ==============================
+// ========>>CRUD HOTEL<<========
+// ==============================
 const createHotel = (req, res, next) => {
-  const { name, sum, city, street, ave } = req.body;
+  const { hotelNo, hotelName, city, hotelAddress } = req.body;
+  console.log(
+    `INSERT INTO hotel(hotelNo, hotelName, city, hotelAddress) VALUES ('${hotelNo}', '${hotelName}', '${city}, '${hotelAddress}')`
+  );
+  client
+    .query(
+      `INSERT INTO hotel(hotelNo, hotelName, city, hotelAddress) VALUES ('${hotelNo}', '${hotelName}', '${city}', '${hotelAddress}')`
+    )
+    .then((res) => res.status(200).send(res))
+    .catch((err) => res.status(500).send(err));
+};
+// --------------------
+const getHotels = async function (req, res, next) {
+  const { rows } = await client.query(
+    `SELECT * FROM hotel ${magicGen("WHERE", req.query)}`
+  );
+  res.status(200).send(rows);
+};
+// --------------------
+const searchHotelsByName = async function (req, res, next) {
+  const { hotelName } = req.query;
+  const { rows } = await client.query(
+    `SELECT * FROM hotel WHERE hotelName LIKE '%${hotelName}%'`
+  );
+  res.status(200).send(rows);
+};
+// --------------------
+const updateHotel = (req, res, next) => {
+  const { hotelNo, hotelName, city, hotelAddress } = req.body;
+  client
+    .query(
+      `UPDATE hotel
+        ${magicGen("SET", {
+          hotelName: hotelName,
+          city: city,
+          hotelAddress: hotelAddress,
+        })}
+        WHERE
+        hotelNo = '${hotelNo}'`
+    )
+    .then((res) => res.status(200).send(res))
+    .catch((err) => res.status(500).send(err));
+};
+// --------------------
+const deleteHotel = (req, res, next) => {
+  console.log(`${magicGen("DELETE FROM hotel WHERE", req.body.hotelNo)}`);
+  client
+    .query(
+      `${magicGen("DELETE FROM hotel WHERE", { hotelNo: req.body.hotelNo })}`
+    )
+    .then((res) => res.status(200).send(res))
+    .catch((err) => res.status(500).send(err));
+};
+// --------------------
+app.post("/createhotel", createHotel);
+app.get("/gethotels", getHotels);
+app.get("/searchhotelsbyname", searchHotelsByName);
+app.post("/updatehotel", updateHotel);
+app.post("/deletehotel", deleteHotel);
+// ==============================
+// ========>>CRUD ROOM<<========
+// ==============================
+const createRoom = (req, res, next) => {
+  const {
+    roomNo,
+    hotelNo,
+    roomType,
+    roomPrice,
+    roomStatus = "free",
+  } = req.body;
+  client
+    .query(
+      `INSERT INTO room(roomNo, hotelNo, roomType, roomPrice, roomStatus)	VALUES ('${roomNo}', '${hotelNo}, '${roomType}, '${roomPrice}, '${roomStatus}')`
+    )
+    .then((res) => next())
+    .catch((err) => res.status(500).send(err));
+};
+// --------------------
+const getRooms = async function (req, res, next) {
+  const { rows } = await client.query(
+    `SELECT * FROM room ${magicGen("WHERE", req.query)}`
+  );
+  res.status(200).send(rows);
+};
+// --------------------
+app.get("/getrooms", getRooms);
+app.post("/createroom", createRoom);
+// ==============================
+// ========>>CRUD GUEST<<========
+// ==============================
+const createGuest = (req, res, next) => {
+  const {
+    guestSsn,
+    guestFname,
+    guestLname,
+    guestAddress,
+    guestBirthdate,
+  } = req.body;
+  client
+    .query(
+      `INSERT INTO guest(guestSsn, guestFname, guestLname, guestAddress, guestBirthdate)	VALUES ('${guestSsn}', '${guestFname}, '${guestLname}, '${guestAddress}, '${guestBirthdate}')`
+    )
+    .then((res) => next())
+    .catch((err) => res.status(500).send(err));
+};
+// --------------------
+const getGuests = async function (req, res, next) {
+  const { rows } = await client.query(`SELECT * FROM guest`);
+  res.status(200).send(rows);
+};
+// --------------------
+app.get("/getguests", getGuests);
+app.post("/createguest", createGuest);
+// ==============================
+// ========>>CRUD PAYMENT<<========
+// ==============================
+const createPayment = (req, res, next) => {
+  const { paymentPrice, paymentType, paymentDate } = req.body;
+  client
+    .query(
+      `INSERT INTO payment(paymentNo, paymentPrice, paymentType, paymentDate)	VALUES (uuid_generate_v4(), '${paymentPrice}, '${paymentType}, '${paymentDate})`
+    )
+    .then((res) => next())
+    .catch((err) => res.status(500).send(err));
+};
+// --------------------
+const getPayments = async function (req, res, next) {
+  const { rows } = await client.query(`SELECT * FROM payment`);
+  res.status(200).send(rows);
+};
+// --------------------
+app.get("/getpayments", getPayments);
+app.post("/createpayment", createPayment);
+
+const createBooking = (req, res, next) => {
+  const {
+    hotelNo,
+    guestSsn,
+    dateIn,
+    dateOut,
+    roomNo,
+    paymentNo = null,
+    bookingStatus = "0",
+  } = req.body;
 
   client
     .query(
-      `INSERT INTO hotel(name, sum, city, street, ave)	VALUES ($1, $2, $3, $4, $5)`,
-      [name, sum, city, street, ave]
+      `INSERT INTO booking(hotelNo, guestSsn, dateIn, dateOut, roomNo, paymentNo, bookingStatus)	VALUES ('${hotelNo}', '${guestSsn}, '${dateIn}, '${dateOut}, '${roomNo}, '${paymentNo}, '${bookingStatus})`
     )
-    .then((res) => res.status(200).send(res))
+    .then((res) => next())
     .catch((err) => res.status(500).send(err));
 };
 
@@ -67,79 +211,10 @@ const createPersonnel = (req, res, next) => {
     .catch((err) => res.status(500).send(err));
 };
 
-const createRoom = (req, res, next) => {
-  const { id, type, cost, bedNumber, floor, hotelName } = req.body;
+// ========>>GET ALLS<<========
 
-  client
-    .query(
-      `INSERT INTO room(id, type, cost, "bedNumber", floor, "hotelName")	VALUES ($1, $2, $3, $4, $5, $6)`,
-      ["uuid_generate_v4()", type, cost, bedNumber, floor, hotelName]
-    )
-    .then((res) => next())
-    .catch((err) => res.status(500).send(err));
-};
-
-const createGuest = (req, res, next) => {
-  const { ssn, email, bDate, Fname, Lname } = req.body;
-
-  client
-    .query(
-      `INSERT INTO guest(ssn, email, "bDate", "Fname", "Lname")	VALUES ($1, $2, $3, $4, $5)`,
-      [ssn, email, bDate, Fname, Lname]
-    )
-    .then((res) => next())
-    .catch((err) => res.status(500).send(err));
-};
-
-const createPayment = (req, res, next) => {
-  const { id, cost, type, date } = req.body;
-
-  client
-    .query(`INSERT INTO payment(id, cost, type, date)	VALUES ($1, $2, $3, $4)`, [
-      "uuid_generate_v4()",
-      cost,
-      type,
-      date,
-    ])
-    .then((res) => next())
-    .catch((err) => res.status(500).send(err));
-};
-
-const createReserve = (req, res, next) => {
-  const {
-    id,
-    roomId,
-    gSsn,
-    payId,
-    duration,
-    reserveDate,
-    gCount,
-    hName,
-    status = 0,
-  } = req.body;
-
-  client
-    .query(
-      `INSERT INTO room(id, "roomId", "gSsn", "payId", duration, "reserveDate", "gCount", "hName", status)	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [
-        "uuid_generate_v4()",
-        id,
-        roomId,
-        gSsn,
-        payId,
-        duration,
-        reserveDate,
-        gCount,
-        hName,
-        status,
-      ]
-    )
-    .then((res) => next())
-    .catch((err) => res.status(500).send(err));
-};
-
-const getHotels = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM hotel`);
+const getBookings = async function (req, res, next) {
+  const { rows } = await client.query(`SELECT * FROM booking`);
   res.status(200).send(rows);
 };
 
@@ -151,7 +226,7 @@ const getServants = async function (req, res, next) {
   res.status(200).send(rows);
 };
 
-const getHotelPersonnel = async function (req, res, next) {
+const getHotelPersonnels = async function (req, res, next) {
   const { type = "servant", hotelName } = req.query;
   const {
     rows,
@@ -161,50 +236,23 @@ const getHotelPersonnel = async function (req, res, next) {
   res.status(200).send(rows);
 };
 
-const getHotelRoom = async function (req, res, next) {
-  const { hotelName } = req.query;
-  const { rows } = await client.query(`SELECT * FROM room
-  WHERE "hotelName" = (VALUES('${hotelName}'))`);
-  res.status(200).send(rows);
-};
-
-const getRoom = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM room`);
-  res.status(200).send(rows);
-};
-
-const getCleaning = async function (req, res, next) {
+const getCleanings = async function (req, res, next) {
   const { rows } = await client.query(`SELECT * FROM cleaning`);
   res.status(200).send(rows);
 };
 
-const getGuest = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM guest`);
-  res.status(200).send(rows);
-};
-
-const getGuestTel = async function (req, res, next) {
+const getGuestTels = async function (req, res, next) {
   const { rows } = await client.query(`SELECT * FROM guesttel`);
   res.status(200).send(rows);
 };
 
-const getHotelTel = async function (req, res, next) {
+const getHotelTels = async function (req, res, next) {
   const { rows } = await client.query(`SELECT * FROM hoteltel`);
   res.status(200).send(rows);
 };
 
-const getPayment = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM hoteltel`);
-  res.status(200).send(rows);
-};
-
-const getPersonnelTel = async function (req, res, next) {
+const getPersonnelTels = async function (req, res, next) {
   const { rows } = await client.query(`SELECT * FROM personneltel`);
-  res.status(200).send(rows);
-};
-
-const getReserve = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM reserve`);
   res.status(200).send(rows);
 };
 
@@ -247,49 +295,63 @@ const createGuestTel = (req, res, next) => {
     .catch((err) => res.status(500).send(err));
 };
 
-// === === === CLEANING === === ===
-app.get("/getcleaning", getCleaning);
-app.post("/createcleaning", createCleaning);
+// === === === HOTEL === === ===
+
+// === === === ROOM === === ===
 
 // === === === GUEST === === ===
-app.get("/getguest", getGuest);
-app.post("/createguest", createGuest);
-
-// === === === GUEST TEL === === ===
-app.get("/getguesttel", getGuestTel);
-app.post("/createguesttel", createGuestTel);
-
-// === === === HOTEL === === ===
-app.get("/gethotels", getHotels);
-app.post("/createhotel", createHotel);
-
-// === === === HOTEL TEL === === ===
-app.get("/gethoteltel", getHotelTel);
-app.post("/createhoteltel", createHotelTel);
 
 // === === === PAYMENT === === ===
-app.get("/getpayment", getPayment);
-app.post("/createpayment", createPayment);
+
+// === === === RESERVE === === ===
+app.get("/getbookings", getBookings);
+app.post("/createreserve", createBooking);
+
+// ---- ---- ---- ---- ----
+// ---- ---- ---- ---- ----
+// ---- ---- ---- ---- ----
+// ---- ---- ---- ---- ----
+// ---- ---- ---- ---- ----
+// ---- ---- ---- ---- ----
+
+// === === === CLEANING === === ===
+app.get("/getcleanings", getCleanings);
+app.post("/createcleaning", createCleaning);
+
+// === === === GUEST TEL === === ===
+app.get("/getguesttels", getGuestTels);
+app.post("/createguesttel", createGuestTel);
+
+// === === === HOTEL TEL === === ===
+app.get("/gethoteltel", getHotelTels);
+app.post("/createhoteltel", createHotelTel);
 
 // === === === PERSONNEL === === ===
-app.get("/gethotelpersonnel", getHotelPersonnel);
+app.get("/gethotelpersonnels", getHotelPersonnels);
 app.get("/getservants", getServants);
 app.post("/createpersonnel", createPersonnel);
 
 // === === === PERSONNEL TEL === === ===
-app.get("/getpersonneltel", getPersonnelTel);
+app.get("/getpersonneltel", getPersonnelTels);
 app.post("/createpersonneltel", createPersonnelTel);
 
-// === === === RESERVE === === ===
-app.get("/getreserve", getReserve);
-app.post("/createreserve", createReserve);
-
-// === === === ROOM === === ===
-app.get("/getroom", getRoom);
-app.get("/gethotelroom", getHotelRoom);
-app.post("/createroom", createRoom);
-
 app.get("/reset", reset);
+
+function existUpdate(key, value, isLast = false) {
+  return value ? `${key} = '${value}'${isLast ? "" : ","}` : "";
+}
+
+function magicGen(cond, params) {
+  let query = Object.keys(params)
+    .filter((k) => params[k] !== undefined)
+    .map((k) => {
+      if (params[k]) return k + "=" + `'${params[k]}'`;
+      else return;
+    })
+    .join(",");
+  if (query) return `${cond} ${query}`;
+  else return "";
+}
 
 // =======================
 // Creates
