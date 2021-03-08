@@ -18,10 +18,10 @@
   },
   "scripts": {
     "start-client": "craco start",
-    "build": "craco build && (cd server && yarn install)",
+    "build": "craco build && (cd server && npm install)",
     "test": "craco test",
     "eject": "react-scripts eject",
-    "start": "cd server && yarn start"
+    "start": "cd server && npm start"
   },
   "eslintConfig": {
     "extends": [
