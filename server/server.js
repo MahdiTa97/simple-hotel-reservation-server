@@ -43,7 +43,7 @@ const createHotel = (req, res, next) => {
 // --------------------
 const getHotels = async function (req, res, next) {
   const { rows } = await client.query(
-    `SELECT * FROM hotel ${magicGen("WHERE", req.query)}`
+    `SELECT * FROM hotel ${magicGen("WHERE", req.query, "AND")}`
   );
   res.status(200).send(rows);
 };
@@ -104,7 +104,7 @@ const createRoom = (req, res, next) => {
 // --------------------
 const getRooms = async function (req, res, next) {
   const { rows } = await client.query(
-    `SELECT * FROM room ${magicGen("WHERE", req.query)}`
+    `SELECT * FROM room ${magicGen("WHERE", req.query, "AND")}`
   );
   res.status(200).send(rows);
 };
@@ -154,7 +154,7 @@ const createGuest = (req, res, next) => {
 // --------------------
 const getGuests = async function (req, res, next) {
   const { rows } = await client.query(
-    `SELECT * FROM guest ${magicGen("WHERE", req.query)}`
+    `SELECT * FROM guest ${magicGen("WHERE", req.query, "AND")}`
   );
   res.status(200).send(rows);
 };
@@ -199,7 +199,9 @@ const createPayment = (req, res, next) => {
 };
 // --------------------
 const getPayments = async function (req, res, next) {
-  const { rows } = await client.query(`SELECT * FROM payment`);
+  const { rows } = await client.query(
+    `SELECT * FROM payment ${magicGen("WHERE", req.query, "AND")}`
+  );
   res.status(200).send(rows);
 };
 // --------------------
@@ -246,7 +248,9 @@ const createBooking = (req, res, next) => {
   } = req.body;
   client
     .query(
-      `INSERT INTO booking(hotelNo, guestSsn, dateIn, dateOut, roomNo, paymentNo, bookingStatus)	VALUES ('${hotelNo}', '${guestSsn}, '${dateIn}, '${dateOut}, '${roomNo}, '${paymentNo}, '${bookingStatus})`
+      `
+
+      INSERT INTO booking(hotelNo, guestSsn, dateIn, dateOut, roomNo, paymentNo, bookingStatus)	VALUES ('${hotelNo}', '${guestSsn}', '${dateIn}', '${dateOut}', '${roomNo}', '${paymentNo}', '${bookingStatus}')`
     )
     .then((res) => next())
     .catch((err) => res.status(500).send(err));
@@ -254,7 +258,7 @@ const createBooking = (req, res, next) => {
 // --------------------
 const getBookings = async function (req, res, next) {
   const { rows } = await client.query(
-    `SELECT * FROM booking  ${magicGen("WHERE", req.query)}`
+    `SELECT * FROM booking  ${magicGen("WHERE", req.query, "AND")}`
   );
   res.status(200).send(rows);
 };
