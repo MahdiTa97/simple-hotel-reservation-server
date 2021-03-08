@@ -193,7 +193,7 @@ app.post("/createguest", createGuest);
 app.post("/updateguest", updateGuest);
 app.post("/deleteguest", deleteGuest);
 // ==============================
-// ========>>CRUD PAYMENT<<========
+// ========>>✔ CRUD PAYMENT<<========
 // ==============================
 const createPayment = (req, res, next) => {
   const { paymentPrice, paymentType, paymentDate } = req.body;
@@ -210,9 +210,37 @@ const getPayments = async function (req, res, next) {
   res.status(200).send(rows);
 };
 // --------------------
+const updatePayment = (req, res, next) => {
+  const { paymentNo, ...resProps } = req.body;
+  client
+    .query(
+      `UPDATE payment
+        ${magicGen("SET", resProps)}
+        WHERE
+        paymentNo = '${paymentNo}'`
+    )
+    .then((res) => res.status(200).send(res))
+    .catch((err) => res.status(500).send(err));
+};
+// --------------------
+const deletePayment = (req, res, next) => {
+  client
+    .query(
+      `${magicGen("DELETE FROM payment WHERE", {
+        paymentNo: req.body.paymentNo,
+      })}`
+    )
+    .then((res) => res.status(200).send(res))
+    .catch((err) => res.status(500).send(err));
+};
+// --------------------
 app.get("/getpayments", getPayments);
 app.post("/createpayment", createPayment);
-
+app.post("/updatepayment", updatePayment);
+app.post("/deletepayment", deletePayment);
+// ==============================
+// ========>>CRUD BOOKING<<========
+// ==============================
 const createBooking = (req, res, next) => {
   const {
     hotelNo,
