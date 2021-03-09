@@ -1,22 +1,21 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const path = require("path");
 const { Client } = require("pg");
 const { createTableText, dropTable } = require("./DB/index");
 const { magicGen } = require("./utils/magicGen");
+const cors = require("cors");
 
-var app = express();
 const PORT = process.env.PORT || 5000;
-const buildPath = path.join(__dirname, "..", "build");
 const connectionString =
   "postgres://xepmtxkk:fxCG378qO0qSmIP4KhGbMeM3w3crc1Iz@ziggy.db.elephantsql.com:5432/xepmtxkk";
 const client = new Client({
   connectionString: connectionString,
 });
 
+var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(buildPath));
+app.use(cors());
 app.set("port", PORT);
 app.listen(PORT, function () {
   console.log(`server started on port ${PORT}`);
@@ -124,7 +123,12 @@ const updateRoom = (req, res, next) => {
 // --------------------
 const deleteRoom = (req, res, next) => {
   client
-    .query(`${magicGen("DELETE FROM room WHERE", { roomNo: req.body.roomNo })}`)
+    .query(
+      `${magicGen("DELETE FROM room WHERE", {
+        roomNo: req.body.roomNo,
+        hotelNo: req.body.hotelNo,
+      })}`
+    )
     .then((res) => res.status(200).send(res))
     .catch((err) => res.status(500).send(err));
 };
@@ -244,15 +248,24 @@ const createBooking = (req, res, next) => {
     dateOut,
     roomNo,
     paymentNo = null,
-    bookingStatus = "0",
+    bookingStatus = 0,
   } = req.body;
   client
     .query(
       `
-
-      INSERT INTO booking(hotelNo, guestSsn, dateIn, dateOut, roomNo, paymentNo, bookingStatus)	VALUES ('${hotelNo}', '${guestSsn}', '${dateIn}', '${dateOut}', '${roomNo}', '${paymentNo}', '${bookingStatus}')`
+      INSERT INTO booking (hotelNo, guestSsn, dateIn, dateOut, roomNo, paymentNo, bookingStatus)
+      SELECT '${hotelNo}', '${guestSsn}', '${dateIn}', '${dateOut}', '${roomNo}', ${paymentNo}, ${bookingStatus}
+      WHERE NOT EXISTS (
+          SELECT dateIn, dateOut, hotelNo, roomNo  FROM booking
+          WHERE dateIn BETWEEN '${dateIn}' AND '${dateOut}'
+          AND dateOut BETWEEN '${dateIn}' AND '${dateOut}'
+          AND hotelNo = '${hotelNo}'
+          AND roomNo = '${roomNo}'
+      )
+      AND '${dateIn}'::date < '${dateOut}'::date
+      `
     )
-    .then((res) => next())
+    .then((res) => res.status(200).send(res))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------

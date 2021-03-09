@@ -241,20 +241,17 @@ WITH (
 
 -- ININININININININININ 1
 INSERT INTO booking(hotelNo, guestSsn, dateIn, dateOut, roomNo, paymentNo, bookingStatus)	VALUES ('${hotelNo}', '${guestSsn}', '${dateIn}', '${dateOut}', '${roomNo}', '${paymentNo}', '${bookingStatus}')
-WHERE
-    NOT EXISTS (
-        SELECT dateIn, dateOut FROM booking WHERE id = 1
-        WHERE NOT(
-          dateIn (BETWEEN ${dateIn} AND dateOut)
-          AND (dateOut BETWEEN dateIn AND dateOut)
-        )
-    );
+WHERE NOT EXISTS (
+        SELECT dateIn, dateOut FROM booking
+        WHERE dateIn BETWEEN '`${dateIn}`' AND '${dateOut}'
+        AND dateOut BETWEEN '`${dateIn}`' AND '${dateOut}'
+    )
 -- ININININININININININ 2
 INSERT INTO booking (hotelNo, guestSsn, dateIn, dateOut, roomNo, paymentNo, bookingStatus)
-SELECT '${hotelNo}', '${guestSsn}', '${dateIn}', '${dateOut}', '${roomNo}', '${paymentNo}', '${bookingStatus}'
+SELECT '${hotelNo}', '${guestSsn}', '${dateIn}', '${dateOut}', '${roomNo}', ${paymentNo}, ${bookingStatus}
 WHERE NOT EXISTS (
     SELECT dateIn, dateOut  FROM booking WHERE(
-          dateIn (BETWEEN `${dateIn}` AND `${dateOut}`)
-          AND (dateOut BETWEEN `${dateIn}` AND `${dateOut}`)
+          dateIn (BETWEEN '${dateIn}' AND '${dateOut}')
+          AND (dateOut BETWEEN '${dateIn}' AND '${dateOut}')
         )
-);
+)
