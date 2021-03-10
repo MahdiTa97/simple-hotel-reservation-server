@@ -267,3 +267,52 @@ DELETE FROM invoices
 
 DELETE FROM invoices
 WHERE invoice_id = 3
+
+SELECT htel FROM
+(SELECT hTel
+FROM hotel h
+JOIN hotelTel ht ON h.hotelNo=ht.hotelNo) a
+JOIN
+(SELECT guestSsn
+FROM guest g
+JOIN Booking b ON g.guestSsn=b.guestSsn) b
+ON a.hotelNo = b.hotelNo
+
+// tedade otagh haye har hotel
+SELECT COUNT(h.hotelName),h.hotelName
+FROM room r
+JOIN hotel h ON r.hotelNo = h.hotelNo
+GROUP BY h.hotelName
+ORDER BY COUNT(h.hotelName) DESC;
+
+// bishtarin otagh too kodoom shahre
+SELECT COUNT(h.hotelNo), h.city
+FROM room r
+JOIN hotel h ON r.hotelNo = h.hotelNo
+GROUP BY h.city
+ORDER BY COUNT(h.hotelName) DESC;
+
+// har shahr chand ta hotel dare
+SELECT COUNT(h.hotelNo), h.city
+FROM hotel h
+GROUP BY h.city
+ORDER BY COUNT(h.hotelName) DESC;
+
+// bishtarin reserve ha marboot be che sharie
+SELECT COUNT(h.city), h.city
+FROM hotel h
+JOIN booking b ON h.hotelNo = b.hotelNo
+GROUP BY h.city
+ORDER BY COUNT(h.hotelName) DESC;
+
+//pirtarin guest
+SELECT AGE(NOW(),g.guestBirthdate) age, g.guestFname
+FROM guest g
+ORDER BY age DESC
+LIMIT 1
+
+//javantarin guest
+SELECT AGE(NOW(),g.guestBirthdate) age, g.guestFname
+FROM guest g
+ORDER BY age ASC
+LIMIT 1

@@ -453,3 +453,72 @@ app.get("/getpersonneltel", getPersonnelTels);
 app.post("/createpersonneltel", createPersonnelTel);
 
 app.get("/reset", reset);
+
+const hotelRoomCount = async function (req, res, next) {
+  const { rows } = await client.query(
+    `SELECT COUNT(h.hotelName),h.hotelName
+    FROM room r
+    JOIN hotel h ON r.hotelNo = h.hotelNo
+    GROUP BY h.hotelName
+    ORDER BY COUNT(h.hotelName) DESC;`
+  );
+  res.status(200).send(rows);
+};
+app.get("/hotelroomcount", hotelRoomCount);
+
+const cityRoomCount = async function (req, res, next) {
+  const { rows } = await client.query(
+    `SELECT COUNT(h.hotelNo), h.city
+    FROM room r
+    JOIN hotel h ON r.hotelNo = h.hotelNo
+    GROUP BY h.city
+    ORDER BY COUNT(h.hotelName) DESC;`
+  );
+  res.status(200).send(rows);
+};
+app.get("/cityroomcount", cityRoomCount);
+
+const cityHotelCount = async function (req, res, next) {
+  const { rows } = await client.query(
+    `SELECT COUNT(h.hotelNo), h.city
+    FROM hotel h
+    GROUP BY h.city
+    ORDER BY COUNT(h.hotelName) DESC;`
+  );
+  res.status(200).send(rows);
+};
+app.get("/cityHotelcount", cityHotelCount);
+
+const mostCityBooking = async function (req, res, next) {
+  const { rows } = await client.query(
+    `SELECT COUNT(h.city), h.city
+    FROM hotel h
+    JOIN booking b ON h.hotelNo = b.hotelNo
+    GROUP BY h.city
+    ORDER BY COUNT(h.hotelName) DESC;`
+  );
+  res.status(200).send(rows);
+};
+app.get("/mostcitybooking", mostCityBooking);
+
+const maxAgeGuest = async function (req, res, next) {
+  const { rows } = await client.query(
+    `SELECT AGE(NOW(),g.guestBirthdate) age, g.guestFname
+    FROM guest g
+    ORDER BY age DESC
+    LIMIT 1`
+  );
+  res.status(200).send(rows);
+};
+app.get("/maxageguest", maxAgeGuest);
+
+const minAgeGuest = async function (req, res, next) {
+  const { rows } = await client.query(
+    `SELECT AGE(NOW(),g.guestBirthdate) age, g.guestFname
+    FROM guest g
+    ORDER BY age ASC
+    LIMIT 1`
+  );
+  res.status(200).send(rows);
+};
+app.get("/minageguest", minAgeGuest);
