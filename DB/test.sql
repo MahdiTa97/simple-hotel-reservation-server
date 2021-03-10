@@ -136,13 +136,13 @@ WITH (
 
 -- INSERT
 INSERT into booking(hotelNo, guestSsn, dateIn, dateOut, roomNo, paymentNo, bookingStatus)
-VALUES('fb01', '0525551433' ,'2001-10-05', '2001-10-07', 501, null, '0'),
-('fb01', '0046525637' ,'2001-10-05', '2001-10-08', 601, null, '0'),
-('fb02', '0189973935' ,'2001-10-05', '2001-10-09', 111, null, '0'),
-('fb02', '0998525227' ,'2001-10-05', '2001-10-10', 101, null, '0'),
-('ch02', '0799624934' ,'2001-10-05', '2001-10-11', 701, null, '0'),
-('dc01', '0020452934' ,'2001-10-05', '2001-10-12', 901, null, '0'),
-('dc01', '0020452935' ,'2001-10-05', '2001-10-13', 111, null, '0');
+VALUES('fb01', '0525551433' ,'2001-10-05', '2001-10-07', 501, null, 0),
+('fb01', '0046525637' ,'2001-10-05', '2001-10-08', 601, null, 0),
+('fb02', '0189973935' ,'2001-10-05', '2001-10-09', 111, null, 0),
+('fb02', '0998525227' ,'2001-10-05', '2001-10-10', 101, null, 0),
+('ch02', '0799624934' ,'2001-10-05', '2001-10-11', 701, null, 0),
+('dc01', '0020452934' ,'2001-10-05', '2001-10-12', 901, null, 0),
+('dc01', '0020452935' ,'2001-10-05', '2001-10-13', 111, null, 0);
 
 -- -------------PERSONNEL-------------
 CREATE TABLE IF NOT EXISTS personnel
@@ -236,22 +236,3 @@ CREATE TABLE IF NOT EXISTS guestTel
 WITH (
     OIDS = FALSE
 );
-
-
-
--- ININININININININININ 1
-INSERT INTO booking(hotelNo, guestSsn, dateIn, dateOut, roomNo, paymentNo, bookingStatus)	VALUES ('${hotelNo}', '${guestSsn}', '${dateIn}', '${dateOut}', '${roomNo}', '${paymentNo}', '${bookingStatus}')
-WHERE NOT EXISTS (
-        SELECT dateIn, dateOut FROM booking
-        WHERE dateIn BETWEEN '`${dateIn}`' AND '${dateOut}'
-        AND dateOut BETWEEN '`${dateIn}`' AND '${dateOut}'
-    )
--- ININININININININININ 2
-INSERT INTO booking (hotelNo, guestSsn, dateIn, dateOut, roomNo, paymentNo, bookingStatus)
-SELECT '${hotelNo}', '${guestSsn}', '${dateIn}', '${dateOut}', '${roomNo}', ${paymentNo}, ${bookingStatus}
-WHERE NOT EXISTS (
-    SELECT dateIn, dateOut  FROM booking WHERE(
-          dateIn (BETWEEN '${dateIn}' AND '${dateOut}')
-          AND (dateOut BETWEEN '${dateIn}' AND '${dateOut}')
-        )
-)

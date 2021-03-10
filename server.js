@@ -36,7 +36,7 @@ const createHotel = (req, res, next) => {
     .query(
       `INSERT INTO hotel(hotelNo, hotelName, city, hotelAddress) VALUES ('${hotelNo}', '${hotelName}', '${city}', '${hotelAddress}')`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
@@ -64,16 +64,20 @@ const updateHotel = (req, res, next) => {
         WHERE
         hotelNo = '${hotelNo}'`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
 const deleteHotel = (req, res, next) => {
   client
     .query(
-      `${magicGen("DELETE FROM hotel WHERE", { hotelNo: req.body.hotelNo })}`
+      `${magicGen(
+        "DELETE FROM hotel WHERE",
+        { hotelNo: req.body.hotelNo },
+        "AND"
+      )}`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
@@ -95,9 +99,9 @@ const createRoom = (req, res, next) => {
   } = req.body;
   client
     .query(
-      `INSERT INTO room(roomNo, hotelNo, roomType, roomPrice, roomStatus)	VALUES ('${roomNo}', '${hotelNo}, '${roomType}, '${roomPrice}, '${roomStatus}')`
+      `INSERT INTO room(roomNo, hotelNo, roomType, roomPrice, roomStatus)	VALUES (${roomNo}, '${hotelNo}', '${roomType}', ${roomPrice}, '${roomStatus}')`
     )
-    .then((res) => next())
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
@@ -115,21 +119,25 @@ const updateRoom = (req, res, next) => {
       `UPDATE room
         ${magicGen("SET", resProps)}
         WHERE
-        roomNo = '${roomNo}'`
+        roomNo = ${roomNo}`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
 const deleteRoom = (req, res, next) => {
   client
     .query(
-      `${magicGen("DELETE FROM room WHERE", {
-        roomNo: req.body.roomNo,
-        hotelNo: req.body.hotelNo,
-      })}`
+      `${magicGen(
+        "DELETE FROM room WHERE",
+        {
+          roomNo: req.body.roomNo,
+          hotelNo: req.body.hotelNo,
+        },
+        "AND"
+      )}`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
@@ -150,9 +158,9 @@ const createGuest = (req, res, next) => {
   } = req.body;
   client
     .query(
-      `INSERT INTO guest(guestSsn, guestFname, guestLname, guestAddress, guestBirthdate)	VALUES ('${guestSsn}', '${guestFname}', '${guestLname}, '${guestAddress}', '${guestBirthdate}')`
+      `INSERT INTO guest(guestSsn, guestFname, guestLname, guestAddress, guestBirthdate)	VALUES ('${guestSsn}', '${guestFname}', '${guestLname}', '${guestAddress}', '${guestBirthdate}')`
     )
-    .then((res) => next())
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
@@ -172,16 +180,20 @@ const updateGuest = (req, res, next) => {
         WHERE
         guestSsn = '${guestSsn}'`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
 const deleteGuest = (req, res, next) => {
   client
     .query(
-      `${magicGen("DELETE FROM guest WHERE", { guestSsn: req.body.guestSsn })}`
+      `${magicGen(
+        "DELETE FROM guest WHERE",
+        { guestSsn: req.body.guestSsn },
+        "AND"
+      )}`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
@@ -196,9 +208,9 @@ const createPayment = (req, res, next) => {
   const { paymentPrice, paymentType, paymentDate } = req.body;
   client
     .query(
-      `INSERT INTO payment(paymentNo, paymentPrice, paymentType, paymentDate)	VALUES (uuid_generate_v4(), '${paymentPrice}, '${paymentType}, '${paymentDate})`
+      `INSERT INTO payment(paymentNo, paymentPrice, paymentType, paymentDate)	VALUES (uuid_generate_v4(), '${paymentPrice}', '${paymentType}', '${paymentDate}')`
     )
-    .then((res) => next())
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
@@ -218,18 +230,22 @@ const updatePayment = (req, res, next) => {
         WHERE
         paymentNo = '${paymentNo}'`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
 const deletePayment = (req, res, next) => {
   client
     .query(
-      `${magicGen("DELETE FROM payment WHERE", {
-        paymentNo: req.body.paymentNo,
-      })}`
+      `${magicGen(
+        "DELETE FROM payment WHERE",
+        {
+          paymentNo: req.body.paymentNo,
+        },
+        "AND"
+      )}`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
@@ -254,18 +270,18 @@ const createBooking = (req, res, next) => {
     .query(
       `
       INSERT INTO booking (hotelNo, guestSsn, dateIn, dateOut, roomNo, paymentNo, bookingStatus)
-      SELECT '${hotelNo}', '${guestSsn}', '${dateIn}', '${dateOut}', '${roomNo}', ${paymentNo}, ${bookingStatus}
+      SELECT '${hotelNo}', '${guestSsn}', '${dateIn}', '${dateOut}', ${roomNo}, ${paymentNo}, ${bookingStatus}
       WHERE NOT EXISTS (
           SELECT dateIn, dateOut, hotelNo, roomNo  FROM booking
           WHERE dateIn BETWEEN '${dateIn}' AND '${dateOut}'
           AND dateOut BETWEEN '${dateIn}' AND '${dateOut}'
           AND hotelNo = '${hotelNo}'
-          AND roomNo = '${roomNo}'
+          AND roomNo = ${roomNo}
       )
       AND '${dateIn}'::date < '${dateOut}'::date
       `
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
@@ -288,20 +304,24 @@ const updateBooking = (req, res, next) => {
           dateIn: dateIn,
         })}`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
 const deleteBooking = (req, res, next) => {
   client
     .query(
-      `${magicGen("DELETE FROM booking WHERE", {
-        hotelNo: req.body.hotelNo,
-        guestSsn: req.body.guestSsn,
-        dateIn: req.body.dateIn,
-      })}`
+      `${magicGen(
+        "DELETE FROM booking WHERE",
+        {
+          hotelNo: req.body.hotelNo,
+          guestSsn: req.body.guestSsn,
+          dateIn: req.body.dateIn,
+        },
+        "AND"
+      )}`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 // --------------------
@@ -330,7 +350,7 @@ const createPersonnel = (req, res, next) => {
       `INSERT INTO personnel("pCode", "fName", "lName", pass, salary, "hotelName", side, "shiftWork", type)	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [pCode, fName, lName, pass, salary, hotelName, side, shiftWork, type]
     )
-    .then((res) => next())
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 
@@ -379,7 +399,7 @@ const createCleaning = (req, res, next) => {
     .query(
       `INSERT INTO cleaning(id, "pCode", "roomId")	VALUES (uuid_generate_v4(), '${pCode}', '${roomId}')`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 
@@ -389,7 +409,7 @@ const createHotelTel = (req, res, next) => {
     .query(
       `INSERT INTO hoteltel("hTel", "hName")	VALUES ('${hTel}', '${hName}')`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 
@@ -399,7 +419,7 @@ const createPersonnelTel = (req, res, next) => {
     .query(
       `INSERT INTO personneltel("pCode", "pTel")	VALUES ('${pCode}', '${pTel}')`
     )
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 
@@ -407,7 +427,7 @@ const createGuestTel = (req, res, next) => {
   const { gSsn, gTel } = req.body;
   client
     .query(`INSERT INTO guesttel("gSsn", "gTel")	VALUES ('${gSsn}', '${gTel}')`)
-    .then((res) => res.status(200).send(res))
+    .then((response) => res.status(200).send(response))
     .catch((err) => res.status(500).send(err));
 };
 
